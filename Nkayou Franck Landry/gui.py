@@ -39,15 +39,17 @@ class TrafficSignRecognizer:
             return
         
         image = cv2.resize(image, (IMG_WIDTH, IMG_HEIGHT))
+        image = image.astype("float32") / 255.0  # Normalize
         self.predict(image, file_path)
     
     def predict(self, image, file_path):
-        prediction = self.model.predict(np.array([image]))
+        image = np.expand_dims(image, axis=0)  # Add batch dimension
+        prediction = self.model.predict(image)
         predicted_category = np.argmax(prediction)
         confidence = np.max(prediction) * 100
         
         img = Image.open(file_path)
-        img = img.resize((200, 200), Image.ANTIALIAS)
+        img = img.resize((200, 200), Image.LANCZOS)  # Use LANCZOS instead of ANTIALIAS
         img = ImageTk.PhotoImage(img)
         
         self.image_label.config(image=img)
